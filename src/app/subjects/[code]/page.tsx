@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -22,6 +22,20 @@ import {
   HelpCircle,
 } from "lucide-react";
 import PdfViewerModal from "@/components/resources/PdfViewerModal";
+import dynamic from "next/dynamic";
+
+const SubjectNotesPanel = dynamic(
+  () => import("@/components/academic/SubjectNotesPanel"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="py-16 text-center space-y-3">
+        <div className="inline-block animate-spin text-2xl text-blue-400">◓</div>
+        <p className="text-xs text-slate-400">Loading interactive curriculum notes...</p>
+      </div>
+    ),
+  }
+);
 
 export default function SubjectDetailPage({
   params,
@@ -104,6 +118,7 @@ export default function SubjectDetailPage({
 
   const tabs = [
     { id: "overview", label: "Overview & Syllabus", icon: Layers },
+    { id: "interactive", label: "📖 Interactive Notes", icon: Sparkles },
     { id: "reading", label: `GFG Reading (${subject.articles?.length || 0})`, icon: BookOpen },
     { id: "notes", label: `PDF Notes (${subject.resources?.filter((r: any) => r.type === "PDF_NOTES").length || 0})`, icon: FileText },
     { id: "lectures", label: "Video Lectures", icon: Video },
@@ -281,6 +296,22 @@ export default function SubjectDetailPage({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Interactive Notes Tab */}
+      {activeTab === "interactive" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-400" />
+              Interactive Notes, Visualizers & Study Guide
+            </h3>
+            <span className="text-xs text-slate-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-lg text-purple-300 font-medium">
+              ✨ With Animations & Simulators
+            </span>
+          </div>
+          <SubjectNotesPanel subjectCode={subject.code} />
         </div>
       )}
 
